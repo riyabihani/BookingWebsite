@@ -17,6 +17,7 @@ export default function PlacesFormPage () {
     const [checkIn, setCheckIn] = useState('');
     const [checkOut, setCheckOut] = useState('');
     const [maxGuests, setMaxGuests] = useState(1);
+    const [price, setPrice] = useState(100);
     const [redirect, setRedirect] = useState(false);
 
     useEffect(() => {
@@ -34,6 +35,7 @@ export default function PlacesFormPage () {
             setCheckIn(data.checkIn);
             setCheckOut(data.checkOut);
             setMaxGuests(data.maxGuests);
+            setPrice(data.price);
         })
     }, [id]);
 
@@ -60,7 +62,7 @@ export default function PlacesFormPage () {
 
     async function savePlace(ev){
         ev.preventDefault();
-        const placeData = {title, address, photos, description, perks, extraInfo, checkIn, checkOut, maxGuests};
+        const placeData = {title, address, photos, description, perks, extraInfo, checkIn, checkOut, maxGuests, price};
         if (id) {
             // update
             await axios.put('/places', {id, ...placeData});
@@ -111,7 +113,7 @@ export default function PlacesFormPage () {
                     onChange={ev => setExtraInfo(ev.target.value)} />
 
                 {preInput('Check In & Out Times + Max Guests', 'Add check in and check out times & remember to have some time for cleaning')}
-                <div className="grid sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 md:sm:grid-cols-4 gap-2">
                     <div>
                         <h3 className="mt-2 -mb-1">Check In Time</h3>
                         <input type="text" 
@@ -131,6 +133,12 @@ export default function PlacesFormPage () {
                         <input type="number" 
                             value={maxGuests} 
                             onChange={ev => setMaxGuests(ev.target.value)} />
+                    </div>
+                    <div>
+                        <h3 className="mt-2 -mb-1">Price Per Night</h3>
+                        <input type="number" 
+                            value={price} 
+                            onChange={ev => setPrice(ev.target.value)} />
                     </div>
                 </div>
                 <button type="submit" className="primary my-4">Save</button>
