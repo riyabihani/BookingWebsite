@@ -6,7 +6,7 @@ export default function AccountNav (){
     if (!subpage) {
         subpage = 'profile';
     }
-    console.log("pathname:", pathname, "subpage:", subpage);
+    // console.log("pathname:", pathname, "subpage:", subpage);
 
 
     function linkClasses (type=null) {
