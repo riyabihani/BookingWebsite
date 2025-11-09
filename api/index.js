@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('./models/User.js');
 const Place = require('./models/Place.js')
+const Booking = require('./models/Booking.js')
 const cookieParser = require('cookie-parser');
 const imageDownloader = require('image-downloader');
 const multer = require('multer');
@@ -146,5 +147,36 @@ app.put('/places', async (req, res) => {
 app.get('/places', async (req, res) => {
     res.json(await Place.find())
 })
+
+app.post('/bookings', (req, res) => {
+    const { token } = req.cookies;
+    jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+        if (err) {
+            return res.status(401).json({ error: 'Authentication required' });
+        }
+        const {place, checkIn, checkOut, noOfGuests, name, phone, price} = req.body;
+        try {
+            const booking = await Booking.create({place, userId:userData.id, checkIn, checkOut, noOfGuests, name, phone, price});
+        res.json(booking);
+        } catch(err) {
+            throw err
+        }
+    })
+})
+
+app.get('/bookings', (req, res) => {
+    const { token } = req.cookies;
+    jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+        if (err) return res.status(401).json({ error: 'Invalid token' });
+        try {
+            const bookings = await Booking.find({ userId: userData.id }).populate('place');
+            res.json(bookings);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Failed to fetch bookings' });
+        }
+    });
+});
+
 
 app.listen(4000)
