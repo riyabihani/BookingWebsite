@@ -178,5 +178,26 @@ app.get('/bookings', (req, res) => {
     });
 });
 
+app.get('/search', async (req, res) => {
+    const {q} = req.query;
+    if (!q) {
+        res.json(await Place.find());
+        return;
+    }
+    try {
+        const searchRegex = new RegExp(q, 'i');
+        const places = await Place.find({
+            $or: [
+                { title: { $regex: searchRegex } },
+                { address: { $regex: searchRegex } },
+                { description: { $regex: searchRegex } }
+            ]
+        });
+        res.json(places);
+    } catch (e) {
+        res.status(500).json({ error: 'Search failed', details: e });
+    }
+});
+
 
 app.listen(4000)
