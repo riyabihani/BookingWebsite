@@ -1,9 +1,34 @@
-import { useContext } from "react";
-import { Link } from "react-router-dom";
+import { useContext, useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "./UserContext.jsx";
 
 export default function Header () {
-    const {user} = useContext(UserContext)
+    const {user} = useContext(UserContext);
+    const [isSearchActive, setIsSearchActive] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('')
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        const searchQueryFromUrl = new URLSearchParams(location.search).get('q');
+        if (searchQueryFromUrl) {
+            setSearchQuery(searchQueryFromUrl); 
+            setIsSearchActive(true);           
+        } else {
+            setSearchQuery('');   
+            setIsSearchActive(false);
+        }
+    }, [location.search]);
+
+    async function handleSearch(ev) {
+      ev.preventDefault();
+      if (searchQuery.trim() === '') {
+            navigate('/');
+      } else {
+            navigate(`/?q=${encodeURIComponent(searchQuery.trim())}`);
+      }
+    }
+
     return(
         <header className='flex justify-between'>
           {/* Name and Icon */}
@@ -11,22 +36,41 @@ export default function Header () {
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-8">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 21v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21m0 0h4.5V3.545M12.75 21h7.5V10.75M2.25 21h1.5m18 0h-18M2.25 9l4.5-1.636M18.75 3l-1.5.545m0 6.205 3 1m1.5.5-1.5-.5M6.75 7.364V3h-3v18m3-13.636 10.5-3.819" />
             </svg>
-            <span className='font-bold text-xl'>Staybnb</span>
+            <span className='font-bold text-xl'>Airbnb</span>
           </Link>
 
           {/* Search Widget */}
-          <div className='flex gap-2 border border-color-gray-300 rounded-full py-2 px-4 shadow-md shadow-gray-200'>
-            <div>Anywhere</div>
-            <div className='border-l border-gray-300'></div>
-            <div>Any week</div>
-            <div className='border-l border-gray-300'></div>
-            <div>Add guests</div>
-            <button className='bg-primary text-white p-1 rounded-full'>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-              </svg>
-            </button>
-          </div>
+          {!isSearchActive && (
+            <div onClick={() => setIsSearchActive(true)} className='flex gap-2 border border-color-gray-300 rounded-full py-2 px-4 shadow-md shadow-gray-200 w-96 justify-between items-center h-16'>
+              <div className="text-lg">Anywhere</div>
+              <div className='border-l border-gray-300 h-10'></div>
+              <div className="text-lg">Any week</div>
+              <div className='border-l border-gray-300 h-10'></div>
+              <div className="text-lg">Add guests</div>
+              <button className='bg-primary text-white p-1 rounded-full'>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+              </button>
+            </div>
+          )}
+
+          {isSearchActive && (
+            <form className='flex gap-2 border border-color-gray-300 rounded-full py-2 px-4 shadow-md shadow-gray-200 w-96 h-16'>
+              <input 
+                  type="text" 
+                  placeholder="Search destinations..." 
+                  value={searchQuery}
+                  onChange={ev => setSearchQuery(ev.target.value)}
+                  autoFocus // This makes the input focused as soon as it appears
+              />
+              <button type="submit" onSubmit={handleSearch} className="bg-primary text-white p-1 rounded-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                  </svg>
+              </button>
+            </form>
+          )}
 
           {/* User Widget */}
           <Link to={user ? '/account' : '/login'} className='flex items-center gap-2 border border-color-gray-300 rounded-full py-2 px-4'>

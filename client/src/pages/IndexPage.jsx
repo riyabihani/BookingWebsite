@@ -1,15 +1,29 @@
 import { useEffect } from "react";
 import axios from 'axios';
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export default function IndexPage() {
     const [places, setPlaces] = useState([]);
+    const location = useLocation();
+
     useEffect(() => {
         axios.get('/places').then(response => {
             setPlaces([...response.data]);
         })
     }, [])
+
+    useEffect(() => {
+        const searchQuery = new URLSearchParams(location.search).get('q');
+        let fetchUrl = '/places';
+        if (searchQuery) {
+            fetchUrl = `/search?q=${encodeURIComponent(searchQuery)}`
+        }
+        axios.get(fetchUrl).then(response => {
+            setPlaces([...response.data]);
+        });
+    }, [location.search])
+
     return (
         <div className="mt-8 gap-6 gap-y-8 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {places.length > 0 && places.map(place => (
